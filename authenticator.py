@@ -30,6 +30,3 @@ def authenticate():
 
     # Return an authenticated Google Drive service instance.
     return build('drive', 'v3', credentials=creds)
-
-
-service = authenticate()
