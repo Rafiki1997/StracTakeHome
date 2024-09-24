@@ -6,10 +6,11 @@ from datetime import datetime
 class FileManagerGUI:
     def __init__(self, drive_service):
         self.drive_service = drive_service
-        self.current_folder_id = None  # This should be set to 'root' initially
+        self.current_folder_id = 'root'
         self.folder_stack = []
         self.listbox = None
 
+    # Create GUI
     def create_gui(self):
         root = tk.Tk()
         root.title("Google Drive File Manager")
@@ -43,6 +44,7 @@ class FileManagerGUI:
         self.update_file_list()  # Initialize the file list
         root.mainloop()
 
+    # Update GUI with list of files from current google drive folder
     def update_file_list(self):
         self.listbox.delete(0, 'end')  # Clear current list
         files = self.drive_service.list_files(self.current_folder_id)
@@ -52,6 +54,7 @@ class FileManagerGUI:
             display_text = f"{file['name']} (Type: {file['mimeType']}, Last Modified: {formatted_time})"
             self.listbox.insert("end", display_text)
 
+    # Delete selected file from google drive
     def on_delete(self):
         selected_index = self.listbox.curselection()
         if selected_index:
@@ -63,6 +66,7 @@ class FileManagerGUI:
                 command.execute()
                 self.update_file_list()
 
+    # Allow user to select directory and download file
     def on_download(self):
         selected_index = self.listbox.curselection()
         if selected_index:
@@ -72,6 +76,7 @@ class FileManagerGUI:
             if save_path:
                 self.drive_service.download_file(selected_file['id'], save_path)
 
+    # Allow user to upload a file to google drive
     def on_upload(self):
         file_path = filedialog.askopenfilename(title="Select a file to upload")
         if file_path:
@@ -86,13 +91,14 @@ class FileManagerGUI:
             selected_file = self.drive_service.list_files(self.current_folder_id)[file_index]
             if selected_file['mimeType'] == 'application/vnd.google-apps.folder':
                 # Push the current folder ID onto the stack before changing it
+                # Used to keep track of parent of sub-folder
                 self.folder_stack.append(self.current_folder_id)
                 self.current_folder_id = selected_file['id']
                 self.update_file_list()
 
     def on_go_back(self):
         if self.folder_stack:
-            self.current_folder_id = self.folder_stack.pop()  # Get the last folder ID from the stack
+            self.current_folder_id = self.folder_stack.pop()  # Pop previous folder ID from stack to return
             self.update_file_list()
         else:
             messagebox.showinfo("Info", "You are already at the root folder.")

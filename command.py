@@ -3,7 +3,7 @@ class Command:
     def execute(self):
         pass
 
-# Method to upload file from google drive
+# Encapsulate upload and delete logic until appropriate execute is called
 class UploadCommand(Command):
     # Intialize parameters for upload
     def __init__(self, drive_service, file_path, folder_id):
