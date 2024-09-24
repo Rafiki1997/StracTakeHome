@@ -30,22 +30,22 @@ def authenticate():
     return build('drive', 'v3', credentials=creds)
 
 def listFiles(service, folder_id=None):
-    #List files in root directory if folder ID isnt provided
+    # List files in root directory if folder ID isnt provided
     query = f"'{folder_id}' in parents" if folder_id else "'root' in parents"
     results = service.files().list(q=query, fields="files(id, name, mimeType, modifiedTime)").execute()
     return results.get('files', [])
 
 def listFolders(service):
-    #List all folder in the users google drive
+    # List all folder in the users google drive
     results = service.files().list(q="mimeType='application/vnd.google-apps.folder'", fields="files(id, name)").execute()
     return results.get('files', [])
 
 def deleteFile(service, file_id):
-    #Delete a file from the user's google drive based off file id
+    # Delete a file from the user's google drive based off file id
     service.files().delete(fileId=file_id).execute()
 
 def downloadFile(service, file_id, save_path):
-    #Download file from user's google drive based off file id
+    # Download file from user's google drive based off file id
     request = service.files().get_media(fileId=file_id)
     with io.FileIO(save_path, 'wb') as fh:
         downloader = MediaIoBaseDownload(fh, request)
@@ -54,7 +54,7 @@ def downloadFile(service, file_id, save_path):
             status, done = downloader.next_chunk()
 
 def uploadFile(service, file_path, folder_id=None):
-    #Upload file to the user's google drive
+    # Upload file to the user's google drive
     file_name = os.path.basename(file_path)
     file_metadata = {'name': file_name}
     if folder_id:
@@ -64,7 +64,7 @@ def uploadFile(service, file_path, folder_id=None):
     service.files().create(body=file_metadata, media_body=media).execute()
 
 def updateFileList(service, listbox, folder_id=None):
-    #Update listbox with files from the user's google drive
+    # Update listbox with files from the user's google drive
     listbox.delete(0, 'end')  # Clear the current list
     files = listFiles(service, folder_id)
     for file in files:
@@ -75,7 +75,7 @@ def updateFileList(service, listbox, folder_id=None):
     return files
 
 def onDelete(service, listbox, folder_id):
-    #Delete the file from the user's google drive
+    # Delete the file from the user's google drive
     selected_index = listbox.curselection()
     if selected_index:
         file_index = selected_index[0]
@@ -86,7 +86,7 @@ def onDelete(service, listbox, folder_id):
             updateFileList(service, listbox, folder_id)
 
 def onDownload(service, listbox, folder_id):
-    #Download a file from the user's google drive
+    # Download a file from the user's google drive
     selected_index = listbox.curselection()
     if selected_index:
         file_index = selected_index[0]
@@ -96,14 +96,14 @@ def onDownload(service, listbox, folder_id):
             downloadFile(service, selected_file['id'], save_path)
 
 def onUpload(service, folder_id, listbox):
-    #Upload a file to the user's google drive
+    # Upload a file to the user's google drive
     file_path = filedialog.askopenfilename(title="Select a file to upload")
     if file_path:
         uploadFile(service, file_path, folder_id)
         updateFileList(service, listbox, folder_id)
 
 def onOpenFolder(service, listbox, folder_id, folder_stack):
-    #Open folders
+    # Open folders
     selected_index = listbox.curselection()
     if selected_index:
         file_index = selected_index[0]
@@ -116,7 +116,7 @@ def onOpenFolder(service, listbox, folder_id, folder_stack):
     return folder_id
 
 def onGoBack(service, listbox, folder_stack):
-    #Return to parent folder
+    # Return to parent folder
     if folder_stack:
         parent_folder_id = folder_stack.pop()  # Pop the last folder ID from the stack
         updateFileList(service, listbox, parent_folder_id)
@@ -144,7 +144,7 @@ def createGUI(service):
     folder_stack = []
 
     def update_current_folder_id(new_folder_id):
-        """Update the current folder ID."""
+        # Update current folder ID
         nonlocal current_folder_id
         current_folder_id = new_folder_id
 
