@@ -53,6 +53,7 @@ class FileManagerGUI:
             formatted_time = modified_time.strftime("%Y-%m-%d %H:%M:%S")
             display_text = f"{file['name']} (Type: {file['mimeType']}, Last Modified: {formatted_time})"
             self.listbox.insert("end", display_text)
+        return files
 
     # Delete selected file from google drive
     def on_delete(self):
@@ -67,18 +68,18 @@ class FileManagerGUI:
                 self.update_file_list()
 
     # Allow user to select directory and download file
-    def on_download(self):
+    def on_download(self, save_path = "", selected_file = ""):
         selected_index = self.listbox.curselection()
         if selected_index:
             file_index = selected_index[0]
-            selected_file = self.drive_service.list_files(self.current_folder_id)[file_index]
-            save_path = filedialog.asksaveasfilename(defaultextension="*.*", title="Select Download Location", initialfile=selected_file['name'])
+            selected_file = selected_file if selected_file else self.drive_service.list_files(self.current_folder_id)[file_index]
+            save_path = save_path if save_path else filedialog.asksaveasfilename(defaultextension="*.*", title="Select Download Location", initialfile=selected_file['name'])
             if save_path:
                 self.drive_service.download_file(selected_file['id'], save_path)
 
     # Allow user to upload a file to google drive
-    def on_upload(self):
-        file_path = filedialog.askopenfilename(title="Select a file to upload")
+    def on_upload(self, file_path = ""):
+        file_path = file_path if file_path else filedialog.askopenfilename(title="Select a file to upload")
         if file_path:
             command = UploadCommand(self.drive_service, file_path, self.current_folder_id)
             command.execute()

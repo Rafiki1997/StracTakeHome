@@ -5,7 +5,7 @@ import os
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 # Unit tests for drive_service
-# TODO: Look into unit testing GUI
+# TODO: Look into unit testing GUI. Make this test functional. Time restrictions prevented me from finishing.
 class TestDriveService(unittest.TestCase):
 
     def setUp(self):

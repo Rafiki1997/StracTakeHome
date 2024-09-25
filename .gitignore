@@ -1,0 +1,5 @@
+# Ignore all files and directories starting with .idea
+.idea/
+
+# Ignore all __pycache__ directories
+__pycache__/

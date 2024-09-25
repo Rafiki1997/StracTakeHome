@@ -1,54 +1,39 @@
-import unittest
-from unittest.mock import patch, MagicMock
 from main import AuthServiceFactory, DriveService, FileManagerGUI, FileController
+import os
+# Note: This is incomplete due to time limitations.
 
+def test_main_integration(self):
+    target_file = "README.md"
+    drive_service = None
+    # Read target file, save its contents
+    with open(target_file, "r") as f:
+        file_contents = f.read()
 
-class TestFileManagerIntegration(unittest.TestCase):
+    # Authenticate
+    auth_service = AuthServiceFactory.create_auth_service()
+    credentials = auth_service.authenticate()
 
-    @patch('main.FileManagerGUI.create_gui')  # Patch the GUI creation
-    @patch('main.DriveService')  # Patch where DriveService is used in main.py
-    @patch('main.auth_service.AuthService.authenticate')  # Patch where auth_service.AuthService is used in main.py
-    def test_main_integration(self, mock_authenticate, mock_drive_service, mock_create_gui):
-        # Mocking Authentication
-        mock_authenticate.return_value = MagicMock()  # Simulates valid credentials
-
-        # Mocking DriveService instance
-        mock_drive_service_instance = MagicMock()
-        mock_drive_service.return_value = mock_drive_service_instance
-
-        # Run your logic from the main.py file (this simulates running the application)
-        auth_service = AuthServiceFactory.create_auth_service()
-        credentials = auth_service.authenticate()
-
-        self.assertIsNotNone(credentials)  # Ensure credentials were retrieved
-
+    if credentials:
         drive_service = DriveService(credentials)
 
-        # Mocking file operations
-        drive_service.upload_file = MagicMock()
-        drive_service.download_file = MagicMock()
-        drive_service.delete_file = MagicMock()
+    assert drive_service is not None
 
-        # Test the FileManagerGUI initialization
-        gui = FileManagerGUI(drive_service)
-        controller = FileController(drive_service, gui)
+    # Upload a file
+    fake_gui = FileManagerGUI(drive_service)
+    fake_gui.on_upload(target_file)
 
-        gui.create_gui()  # Simulate the GUI creation
+    # List Files (check if our file is there)
+    file_list = fake_gui.update_file_list()
+    file_names = []
+    for file in file_list:
+        file_names.append(file['name'])
+    assert target_file in file_names
 
-        # Assertions to check that components interacted as expected
-        mock_create_gui.assert_called_once()  # Check if GUI creation was called
-        mock_drive_service.assert_called_once_with(credentials)  # Check if DriveService was called with credentials
+    # Download the file
+    fake_gui.on_download(os.getcwd() + "target_file_download")
 
-        # Simulating file operations
-        drive_service.upload_file('test.txt', 'folder_id')
-        drive_service.download_file('file_id', 'downloaded.txt')
-        drive_service.delete_file('file_id')
-
-        # Check file operations were called
-        drive_service.upload_file.assert_called_once_with('test.txt', 'folder_id')
-        drive_service.download_file.assert_called_once_with('file_id', 'downloaded.txt')
-        drive_service.delete_file.assert_called_once_with('file_id')
-
+    # Read the file, check its contents
+    # Unfortunately, I ran out of time and could not fill this out.
 
 if __name__ == "__main__":
-    unittest.main()
+    test_main_integration()
